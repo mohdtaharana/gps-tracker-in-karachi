@@ -1,0 +1,7 @@
+{
+  "name": "Karachi Secure Logistics Tracker",
+  "description": "A high-performance GPS tracking and logistics management system designed for the complex distributed environments of Karachi, featuring AI-powered route optimization and secure data monitoring.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
