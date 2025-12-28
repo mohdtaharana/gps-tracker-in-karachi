@@ -97,7 +97,6 @@ const Sidebar: React.FC<SidebarProps> = ({ vehicles, logs, onSelectVehicle, onUp
         )}
         {filteredVehicles.map(v => {
           const config = getStatusConfig(v.status);
-          // Always try to use MongoDB _id first, then fallback to sim id
           const vId = v._id || v.id;
           const isSelected = selectedVehicleId === vId;
           return (
@@ -175,30 +174,7 @@ const Sidebar: React.FC<SidebarProps> = ({ vehicles, logs, onSelectVehicle, onUp
         })}
       </div>
 
-      <div className="p-4 bg-slate-900/60 border-t border-slate-800">
-        <div className="flex justify-between items-center mb-3">
-          <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Secure Event Stream</h4>
-          <span className="text-[8px] font-mono text-emerald-500/50 uppercase">Encrypted</span>
-        </div>
-        <div className="space-y-2 h-32 overflow-y-auto scrollbar-hide">
-           {logs.length === 0 ? (
-             <div className="text-[9px] text-slate-700 font-mono italic text-center py-4">No security logs recorded.</div>
-           ) : (
-             logs.map(log => (
-               <div key={log._id || log.id} className="text-[9px] font-mono p-2 bg-black/20 border border-white/5 rounded-md text-slate-500 group animate-in fade-in slide-in-from-top-1">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-emerald-500/60">[{log.timestamp}]</span>
-                    <span className={`text-[8px] uppercase font-bold ${
-                      log.severity === 'critical' ? 'text-rose-500' : log.severity === 'warning' ? 'text-amber-500' : 'text-slate-600'
-                    }`}>{log.severity}</span>
-                  </div>
-                  <span className="text-slate-400 block break-words">{log.message}</span>
-                  <div className="text-[7px] opacity-0 group-hover:opacity-40 transition-opacity mt-1">SIGNATURE::{log.hash.slice(0, 24)}...</div>
-               </div>
-             ))
-           )}
-        </div>
-      </div>
+     
     </div>
   );
 };

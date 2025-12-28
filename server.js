@@ -1,8 +1,9 @@
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import 'dotenv/config';
+import crypto from 'crypto';
 
 const app = express();
 app.use(cors());
@@ -11,8 +12,8 @@ app.use(express.json());
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/karachi_logistics';
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to Karachi Secure MongoDB'))
-  .catch(err => console.error('MongoDB Connection Error:', err));
+  .then(() => console.log('✅ Connected to Karachi Secure MongoDB'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Vehicle Schema
 const VehicleSchema = new mongoose.Schema({
@@ -107,12 +108,12 @@ app.post('/api/fleet/update-status', async (req, res) => {
     const vehicle = await Vehicle.findByIdAndUpdate(id, { status, lastUpdate: Date.now() }, { new: true });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
     
-    // Create audit log
+    // Create audit log using imported crypto
     const newLog = new Log({
       vehicleId: vehicle.regNumber,
       message: `Status updated to ${status.toUpperCase()}`,
       severity: status === 'emergency' ? 'critical' : status === 'warning' ? 'warning' : 'info',
-      hash: require('crypto').randomBytes(16).toString('hex')
+      hash: crypto.randomBytes(16).toString('hex')
     });
     await newLog.save();
     res.json({ vehicle, log: newLog });
@@ -131,4 +132,4 @@ app.get('/api/logs', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Secure Backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Secure Backend running on port ${PORT}`));

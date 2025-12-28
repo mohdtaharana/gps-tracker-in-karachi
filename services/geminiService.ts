@@ -2,16 +2,36 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Vehicle, AIResponse } from "../types";
 
-// Always use the API_KEY from process.env directly as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Utility to clean potential markdown from AI JSON responses
+ */
+const cleanJSON = (text: string): string => {
+  return text.replace(/```json/g, "").replace(/```/g, "").trim();
+};
 
 export const analyzeLogistics = async (vehicles: Vehicle[]): Promise<AIResponse> => {
+  // Always use process.env.API_KEY as the single source of truth
+  const apiKey = process.env.API_KEY;
+
   try {
+    const ai = new GoogleGenAI({ apiKey: apiKey! });
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Analyze this real-time Karachi logistics fleet data: ${JSON.stringify(vehicles)}. 
-      Context: Karachi has complex traffic (Saddar, Sharea Faisal), potential security zones, and varying road quality.
-      Provide a summary, risk level, and specific optimization recommendations.`,
+      model: "gemini-3-pro-preview",
+      contents: `System Role: You are the Lead AI Controller for KHI SECURE. 
+      Analyze this real-time Karachi fleet data: ${JSON.stringify(vehicles)}. 
+      
+      Karachi Context: 
+      - Port Qasim to SITE route often has heavy traffic.
+      - Sharea Faisal is a high-speed but congested artery.
+      - Night-time security near bypass areas is critical.
+      
+      Task: Evaluate security risks, battery levels, and route efficiency.
+      Output exactly in JSON format:
+      {
+        "summary": "Brief professional overview of fleet health (2 sentences)",
+        "recommendations": ["4 specific tactical steps for operators"],
+        "riskLevel": "Low" | "Medium" | "High"
+      }`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -29,17 +49,20 @@ export const analyzeLogistics = async (vehicles: Vehicle[]): Promise<AIResponse>
       }
     });
 
-    // Access .text property directly and trim as per guidelines
-    const jsonStr = response.text?.trim();
-    if (!jsonStr) {
-      throw new Error("No text response received from AI");
-    }
-    return JSON.parse(jsonStr);
+    const rawText = response.text;
+    if (!rawText) throw new Error("Empty AI Response");
+
+    return JSON.parse(cleanJSON(rawText));
   } catch (error) {
-    console.error("AI Analysis failed:", error);
+    console.error("Gemini Logistics Analysis Failure:", error);
     return {
-      summary: "Real-time AI analysis currently offline. Manual monitoring recommended.",
-      recommendations: ["Ensure all vehicles stick to designated safe routes", "Verify driver IDs manually"],
+      summary: "AI Engine encountered a synchronization error. Operating on standard protocols.",
+      recommendations: [
+        "Monitor battery levels manually for sim_2",
+        "Maintain direct radio contact with all units",
+        "Verify network link in command dashboard",
+        "Check API Key permissions in Google Console"
+      ],
       riskLevel: "Medium"
     };
   }
